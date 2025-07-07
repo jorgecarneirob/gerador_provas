@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Provas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de Provas</h1>
+
+        {% if message %}
+            <div class="success-message">{{ message }}</div>
+            <div class="download-links">
+                <p>Clique para baixar:</p>
+                <a href="{{ url_for('download_file', filename=docx_file) }}" class="button" download>{{ docx_file }}</a>
+                <a href="{{ url_for('download_file', filename=gabarito_file) }}" class="button" download>{{ gabarito_file }}</a>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form action="/gerar_provas" method="post" id="gerar-provas-form">
+            <div class="form-section">
+                <h2>Informações da Prova</h2>
+                <div class="form-group">
+                    <label for="professor_nome">Nome do Professor:</label>
+                    <input type="text" id="professor_nome" name="professor_nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="data_prova">Data:</label>
+                    <input type="date" id="data_prova" name="data_prova" required>
+                </div>
+                <div class="form-group">
+                    <label for="turma_nome">Turma:</label>
+                    <input type="text" id="turma_nome" name="turma_nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="num_questoes">Número de Questões:</label>
+                    <input type="number" id="num_questoes" name="num_questoes" min="1" value="1" required>
+                </div>
+            </div>
+
+            <div id="questoes-container" class="form-section">
+                <h2>Questões</h2>
+                </div>
+
+            <button type="submit" class="button primary">Gerar Provas</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>
