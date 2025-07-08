@@ -1,10 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     const numQuestoesInput = document.getElementById('num_questoes');
+    const numAlternativasInput = document.getElementById('num_alternativas'); // Novo input
     const questoesContainer = document.getElementById('questoes-container');
-    const alternativas = ['A', 'B', 'C', 'D', 'E'];
+
+    function generateAlphabetArray(num) {
+        return Array.from({ length: num }, (_, i) => String.fromCharCode(65 + i));
+    }
 
     function renderQuestoes() {
         const numQuestoes = parseInt(numQuestoesInput.value);
+        const numAlternativas = parseInt(numAlternativasInput.value); // Obter o número de alternativas
+        const alternativas = generateAlphabetArray(numAlternativas); // Gerar as letras dinamicamente
+
         questoesContainer.innerHTML = ''; // Limpa o container antes de adicionar novas questões
 
         for (let i = 1; i <= numQuestoes; i++) {
@@ -40,7 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Renderiza as questões iniciais
     renderQuestoes();
 
-    // Adiciona listener para renderizar questões quando o número muda
+    // Adiciona listener para renderizar questões quando o número de questões ou alternativas muda
     numQuestoesInput.addEventListener('change', renderQuestoes);
-    numQuestoesInput.addEventListener('keyup', renderQuestoes); // Para quando o usuário digita
+    numQuestoesInput.addEventListener('keyup', renderQuestoes);
+    numAlternativasInput.addEventListener('change', renderQuestoes); // Novo listener
+    numAlternativasInput.addEventListener('keyup', renderQuestoes); // Novo listener
 });
+

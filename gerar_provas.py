@@ -9,7 +9,7 @@ from docx import Document
 
 # Variáveis globais
 NUM_QUESTOES = 10
-ALTERNATIVAS = ["A", "B", "C", "D", "E"]
+#ALTERNATIVAS = ["A", "B", "C", "D", "E"]
 TIPOS_PROVA = [1, 2, 3, 4]
 
 def obter_gabarito_original():
@@ -105,7 +105,7 @@ def gerar_tipos_prova(gabarito_base, tipos=TIPOS_PROVA):
 
     return provas
 
-def salvar_gabarito_txt(provas, arquivo=r"C:\Wagner\1A_F\gabarito.txt"):
+def salvar_gabarito_txt(provas, filename):
     linhas = []
 
     for tipo, prova in provas.items():
@@ -120,9 +120,9 @@ def salvar_gabarito_txt(provas, arquivo=r"C:\Wagner\1A_F\gabarito.txt"):
     with open(arquivo, "w", encoding="utf-8") as f:
         f.write("\n".join(linhas))
 
-    print(f"\nArquivo '{arquivo}' gerado com sucesso!")
+    print(f"\nArquivo '{filename}' gerado com sucesso!")
 
-def gerar_word_unificado(provas, arquivo=r"C:\Wagner\1A_F\provas.docx"):
+def gerar_word_unificado(provas, filename):
     doc = Document()
 
     for tipo, prova in provas.items():
@@ -165,7 +165,7 @@ import os # Importar para manipulação de diretórios
 
 ALTERNATIVAS = ["A", "B", "C", "D", "E"]
 
-def ler_entrada_txt(filepath): # Alterado para aceitar filepath
+def ler_entrada_txt(filepath, alternativas_list): # Alterado para aceitar filepath
     """
     Lê o arquivo entrada.txt e gera o gabarito-base
     """
@@ -186,12 +186,14 @@ def ler_entrada_txt(filepath): # Alterado para aceitar filepath
 
         alternativas = {}
         pesos_alt = {}
-        for _ in range(5):
+        # Usar alternativas_list para iterar
+        for _ in range(len(alternativas_list)):
             letra, texto, peso = lines[i].split("|")
             alternativas[letra] = texto
             pesos_alt[letra] = float(peso)
             i += 1
 
+        # A alternativa correta ainda é determinada pelo maior peso
         correta = max(pesos_alt, key=pesos_alt.get)
         gabarito_base[q_id] = {
             "enunciado": enunciado,
@@ -202,12 +204,12 @@ def ler_entrada_txt(filepath): # Alterado para aceitar filepath
         }
     return gabarito_base
 
-def gerar_provas(gabarito_base, num_tipos=4):
+def gerar_provas(gabarito_base, num_tipos, alternativas_list): # Adicionado alternativas_list e num_tipos
     """
     Gera várias provas embaralhando as alternativas
     """
     todas_provas = {}
-    for tipo in range(1, num_tipos + 1):
+    for tipo in range(1, num_tipos + 1): # Usar num_tipos
         prova = {}
         for q_id, dados in gabarito_base.items():
             enunciado = dados["enunciado"]
@@ -219,7 +221,8 @@ def gerar_provas(gabarito_base, num_tipos=4):
 
             alt_embaralhadas = {}
             pesos_embaralhados = {}
-            for letra_nova, letra_old in zip(ALTERNATIVAS, letras):
+            # Usar alternativas_list para zip
+            for letra_nova, letra_old in zip(alternativas_list, letras):
                 alt_embaralhadas[letra_nova] = alternativas[letra_old]
                 pesos_embaralhados[letra_nova] = pesos_alt[letra_old]
 
@@ -236,7 +239,7 @@ def gerar_provas(gabarito_base, num_tipos=4):
         todas_provas[str(tipo)] = prova
     return todas_provas
 
-def salvar_gabarito_arquivo(provas, filename): # Alterado para aceitar filename
+def salvar_gabarito_arquivo(provas, filename, alternativas_list): # Adicionado alternativas_list
     """
     Salva todas as provas em arquivo gabarito.txt
     """
@@ -244,13 +247,16 @@ def salvar_gabarito_arquivo(provas, filename): # Alterado para aceitar filename
         for tipo, prova in provas.items():
             for q_id, dados in prova.items():
                 peso_q = dados["peso_questao"]
-                alt_pesos = ",".join(f"{alt}:{peso}" for alt, peso in dados["pesos_alt"].items())
+                # Usar os pesos das alternativas que já estão no dicionário de dados
+                alt_pesos = ",".join(f"{alt}:{dados['pesos_alt'][alt]}" for alt in alternativas_list)
                 correta = dados["correta"]
                 f.write(f"{tipo}|{q_id}|{peso_q}|{alt_pesos}|{correta}\n")
 
-def gerar_word_unificado(provas, filename): # Alterado para aceitar filename
+    print(f"\nArquivo '{filename}' gerado com sucesso!")
+
+def gerar_word_unificado(provas, filename, alternativas_list): # Adicionado alternativas_list
     """
-    Gera um arquivo Word único com as 4 provas
+    Gera um arquivo Word único com as provas
     """
     doc = Document()
 
@@ -262,12 +268,11 @@ def gerar_word_unificado(provas, filename): # Alterado para aceitar filename
 
         for q_id, dados in sorted(prova.items(), key=lambda x: int(x[0][1:])):
             doc.add_paragraph(f"{q_id} - {dados['enunciado']}", style='Normal')
-            for alt in ALTERNATIVAS:
+            # Usar alternativas_list para iterar
+            for alt in alternativas_list:
                 texto = dados["alternativas"][alt]
                 doc.add_paragraph(f"({alt}) {texto}", style='Normal')
-            #doc.add_paragraph("Resposta: ____________________")
-            #doc.add_paragraph(" ")
-        doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
+            doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
     doc.save(filename)
     print(f"Arquivo Word salvo: {filename}")
 

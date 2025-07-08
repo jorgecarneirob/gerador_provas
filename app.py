@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, send_file, redirect, url_for
 import os
 import datetime
 import sys
+import string # Para gerar as letras das alternativas
+
 # Adiciona o diretório atual ao PATH do Python para que possa importar gerar_provas
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import gerar_provas # Importa seu script refatorado
@@ -24,6 +26,11 @@ def gerar_provas_web():
     data_prova = request.form['data_prova']
     turma_nome = request.form['turma_nome']
     num_questoes = int(request.form['num_questoes'])
+    num_alternativas = int(request.form['num_alternativas']) # Novo campo
+    num_tipos_prova = int(request.form['num_tipos_prova'])   # Novo campo
+
+    # Gerar a lista de alternativas dinamicamente (A, B, C, D, E, F...)
+    alternativas_letras = [string.ascii_uppercase[i] for i in range(num_alternativas)]
 
     # Geração do conteúdo do entrada.txt
     entrada_content = []
@@ -35,7 +42,7 @@ def gerar_provas_web():
         entrada_content.append(f"{q_id}|{peso_questao}")
         entrada_content.append(enunciado)
 
-        for alt_letra in gerar_provas.ALTERNATIVAS: # Usar a lista de alternativas do seu script
+        for alt_letra in alternativas_letras: # Usar a lista de alternativas gerada
             alt_texto = request.form[f'alt_{alt_letra}_q{i}']
             alt_peso = request.form[f'peso_alt_{alt_letra}_q{i}']
             entrada_content.append(f"{alt_letra}|{alt_texto}|{alt_peso}")
@@ -53,11 +60,11 @@ def gerar_provas_web():
         f.write("\n".join(entrada_content))
 
     try:
-        # Chama as funções do script gerar_provas.py
-        gabarito_base = gerar_provas.ler_entrada_txt(entrada_txt_path)
-        todas_provas = gerar_provas.gerar_provas(gabarito_base, num_tipos=4)
-        gerar_provas.salvar_gabarito_arquivo(todas_provas, gabarito_txt_path)
-        gerar_provas.gerar_word_unificado(todas_provas, provas_docx_path)
+        # Chama as funções do script gerar_provas.py com os novos parâmetros
+        gabarito_base = gerar_provas.ler_entrada_txt(entrada_txt_path, alternativas_letras)
+        todas_provas = gerar_provas.gerar_provas(gabarito_base, num_tipos_prova, alternativas_letras)
+        gerar_provas.salvar_gabarito_arquivo(todas_provas, gabarito_txt_path, alternativas_letras)
+        gerar_provas.gerar_word_unificado(todas_provas, provas_docx_path, alternativas_letras)
 
         return render_template('index.html',
                                message="Provas geradas com sucesso!",

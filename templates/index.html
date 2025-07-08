@@ -40,13 +40,22 @@
                 </div>
                 <div class="form-group">
                     <label for="num_questoes">Número de Questões:</label>
-                    <input type="number" id="num_questoes" name="num_questoes" min="1" value="1" required>
+                    <input type="number" id="num_questoes" name="num_questoes" min="1" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="num_alternativas">Número de Alternativas por Questão:</label>
+                    <input type="number" id="num_alternativas" name="num_alternativas" min="2" max="26" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="num_tipos_prova">Número de Tipos de Prova:</label>
+                    <input type="number" id="num_tipos_prova" name="num_tipos_prova" min="1" value="4" required>
                 </div>
             </div>
 
             <div id="questoes-container" class="form-section">
                 <h2>Questões</h2>
-                </div>
+                <!-- Questões serão adicionadas aqui pelo JavaScript -->
+            </div>
 
             <button type="submit" class="button primary">Gerar Provas</button>
         </form>
